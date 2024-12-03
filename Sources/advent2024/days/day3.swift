@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import RegexBuilder
 
 struct Day3 {
     let input: String
@@ -13,14 +14,35 @@ struct Day3 {
     static let example = #"""
     xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
     """#
+    static let example2 = #"""
+    xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
+    """#
 
-    func parse() -> [(Int, Int)] {
-        let pattern = /mul\(([0-9]+),([0-9]+)\)/
-        var result = [(Int, Int)]()
+    enum Instruction {
+        case `do`
+        case dont
+        case mul(Int, Int)
+    }
+
+    func parse() -> [Instruction] {
+        let mulPattern = /mul\(([0-9]+),([0-9]+)\)/
+        let doPattern = /do\(\)/
+        let dontPattern = /don't\(\)/
+        let pattern = ChoiceOf {
+            mulPattern
+            doPattern
+            dontPattern
+        }
+        var result = [Instruction]()
         for match in input.matches(of: pattern) {
-            let lhs = match.1
-            let rhs = match.2
-            result.append((Int(lhs)!, Int(rhs)!))
+            switch match.0 {
+            case "do()":
+                result.append(.do)
+            case "don't()":
+                result.append(.dont)
+            default:
+                result.append(.mul(Int(match.1!)!, Int(match.2!)!))
+            }
         }
         return result
     }
@@ -28,8 +50,39 @@ struct Day3 {
     // 189600467
     func part1() {
         let result = parse()
+            .compactMap { instruction in
+                switch instruction {
+                case .mul(let lhs, let rhs):
+                    (lhs, rhs)
+                default:
+                    nil
+                }
+            }
             .map { $0 * $1 }
             .reduce(0, +)
+
+        print(result)
+    }
+
+    // 107069718
+    func part2() {
+        let instructions = parse()
+        var `do` = true
+        var result = 0
+        for instruction in instructions {
+            switch instruction {
+            case .do:
+                `do` = true
+            case .dont:
+                `do` = false
+            case .mul(let lhs, let rhs):
+                if `do` {
+                    result += (lhs * rhs)
+                } else {
+                    continue
+                }
+            }
+        }
 
         print(result)
     }
