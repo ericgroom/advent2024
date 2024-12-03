@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "advent2024",
+    platforms: [.macOS(.v15)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .executable(name: "advent2024", targets: ["advent2024"])
