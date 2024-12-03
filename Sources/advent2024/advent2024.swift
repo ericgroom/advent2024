@@ -8,6 +8,8 @@ struct Advent2024 {
     static func main() {
         Day1(input: Day1.example).part1()
         Day1(input: getInput(filename: "day1")).part1()
+        Day1(input: Day1.example).part2()
+        Day1(input: getInput(filename: "day1")).part2()
     }
 
     static func getInput(filename: String) -> String {

@@ -44,4 +44,19 @@ struct Day1 {
         let result = distances.reduce(0, +)
         print(result)
     }
+
+    // 22962826
+    func part2() {
+        let parsed = parse()
+        let lhs = parsed.map(\.0)
+        let rhs = parsed.map(\.1)
+        var rhsFrequency = [Int: Int]()
+        for num in rhs {
+            rhsFrequency[num, default: 0] += 1
+        }
+        let result = lhs
+            .map { $0 * rhsFrequency[$0, default: 0] }
+            .reduce(0, +)
+        print(result)
+    }
 }
