@@ -39,6 +39,21 @@ struct Day2 {
         print(result)
     }
 
+    // 398
+    func part2() {
+        let reports = parse(input)
+        let safeReports = reports.filter { safe(levels: $0)}
+        let unsafeReports = reports.filter { !safe(levels: $0)}
+        let newSafeReports = unsafeReports.filter { report in
+            report.indices.contains { index in
+                var without = report
+                without.remove(at: index)
+                return safe(levels: without)
+            }
+        }
+        print(safeReports.count + newSafeReports.count)
+    }
+
     private func safe(levels: [Int]) -> Bool {
         assert(levels.count >= 2)
         var previousLevel = levels[0]
