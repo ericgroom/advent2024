@@ -47,6 +47,58 @@ struct Day4 {
         print(matchCount)
     }
 
+    // 1912
+    func part2() {
+        let grid = parse()
+        var matchCount = 0
+        for location in grid.coordinates {
+            for window in windows() {
+                if windowMatches(window: window, at: location, in: grid) {
+                    matchCount += 1
+                }
+            }
+        }
+
+        print(matchCount)
+    }
+
+    func windowMatches(window: [[Character?]], at location: Vec2D, in grid: Grid<Character>) -> Bool {
+        for (y, row) in window.enumerated() {
+            for (x, value) in row.enumerated() {
+                guard let value else { continue }
+                let gridCoordinate = Vec2D(x: x, y: y) + location
+                guard let gridValue = grid[gridCoordinate] else { return false }
+                guard gridValue == value else { return false }
+            }
+        }
+        return true
+    }
+
+    func windows() -> Set<[[Character?]]> {
+        [
+            [
+                ["M", nil, "M"],
+                [nil, "A", nil],
+                ["S", nil, "S"],
+            ],
+            [
+                ["S", nil, "M"],
+                [nil, "A", nil],
+                ["S", nil, "M"],
+            ],
+            [
+                ["S", nil, "S"],
+                [nil, "A", nil],
+                ["M", nil, "M"],
+            ],
+            [
+                ["M", nil, "S"],
+                [nil, "A", nil],
+                ["M", nil, "S"],
+            ],
+        ]
+    }
+
     func sequenceExists(sequence: ArraySlice<Character>, from start: Vec2D, in grid: Grid<Character>, towards direction: Direction) -> Bool {
         guard !sequence.isEmpty else { return true }
         let expectedValue = sequence.first!
