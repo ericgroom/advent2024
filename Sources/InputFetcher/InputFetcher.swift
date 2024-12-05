@@ -13,10 +13,26 @@ public func fetchInput(for day: Int) async throws -> String {
         return try String(contentsOf: localURL, encoding: .utf8)
     } else {
         // create the file so we don't try over and over if the network fails
+        try remoteFetchFailsafe(day: day)
         FileManager.default.createFile(atPath: localURL.path(), contents: nil)
         let fromRemote = try await fetchFromRemote(for: day)
         FileManager.default.createFile(atPath: localURL.path(), contents: fromRemote.data(using: .utf8))
         return fromRemote
+    }
+}
+
+fileprivate func remoteFetchFailsafe(day: Int) throws {
+    // I don't trust someone inexperienced to run this code and not spam the server
+    // so here is a failsafe
+    struct FetchError: Error {
+        let localizedDescription: String
+    }
+    let checkURL = URL(filePath: #filePath)
+        .deletingLastPathComponent()
+        .appending(component: "enableFetching", directoryHint: .notDirectory)
+    guard FileManager.default.fileExists(atPath: checkURL.path()) else {
+        let errorMessage = "Input file missing for day \(day). Expected at \(localInputFileURL(for: day))"
+        throw FetchError(localizedDescription: errorMessage)
     }
 }
 
