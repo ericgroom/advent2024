@@ -24,6 +24,8 @@ struct Advent2024 {
         Day4(input: getInput(filename: "day4")).part2()
         Day5(input: Day5.example).part1()
         Day5(input: getInput(filename: "day5")).part1()
+        Day5(input: Day5.example).part2()
+        Day5(input: getInput(filename: "day5")).part2()
     }
 
     static func getInput(filename: String) -> String {
