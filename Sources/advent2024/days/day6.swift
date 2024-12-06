@@ -11,7 +11,7 @@ struct Day6: Day {
     typealias Input = Lab
 
     struct Lab {
-        let map: Grid<Tile>
+        var map: Grid<Tile>
         var `guard`: Guard
     }
 
@@ -20,7 +20,7 @@ struct Day6: Day {
         case obstructed
     }
 
-    struct Guard {
+    struct Guard: Equatable, Hashable {
         var position: Vec2D
         var heading: Direction
     }
@@ -62,7 +62,6 @@ struct Day6: Day {
         var lab = input
         var visited: Set<Vec2D> = []
         repeat {
-            print(lab.guard.position)
             visited.insert(lab.guard.position)
             advanceGuard(&lab)
         } while lab.map[lab.guard.position] != nil
@@ -70,17 +69,39 @@ struct Day6: Day {
     }
     
     func part2() -> String {
-        ""
+        let lab = input
+        let guardStartingPosition = lab.guard.position
+        var trappingPositions: Set<Vec2D> = []
+        for testCoord in lab.map.coordinates {
+            guard testCoord != guardStartingPosition else { continue }
+            var testLab = lab
+            testLab.map[testCoord] = .obstructed
+            switch runSimulation(testLab) {
+            case .escaped: continue
+            case .looped: trappingPositions.insert(testCoord)
+            }
+        }
+        return String(trappingPositions.count)
+    }
+
+    enum GuardResult { case escaped, looped }
+    private func runSimulation(_ lab: Lab) -> GuardResult {
+        var lab = lab
+        var guards: Set<Guard> = []
+        repeat {
+            advanceGuard(&lab)
+            if guards.contains(lab.guard) { return .looped }
+            guards.insert(lab.guard)
+        } while lab.map[lab.guard.position] != nil
+        return .escaped
     }
 
     private func advanceGuard(_ lab: inout Lab) {
         let nextCoord = lab.guard.position + lab.guard.heading.unitVector
         switch lab.map[nextCoord] {
         case .empty, nil:
-            print("empty")
             lab.guard.position = nextCoord
         case .obstructed:
-            print("obstructed")
             lab.guard.heading = lab.guard.heading.rotatedClockwise().rotatedClockwise()
         }
     }
