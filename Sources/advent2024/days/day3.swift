@@ -8,8 +8,8 @@
 import Foundation
 import RegexBuilder
 
-struct Day3 {
-    let input: String
+struct Day3: Day {
+    let input: [Instruction]
 
     static let example = #"""
     xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
@@ -24,7 +24,7 @@ struct Day3 {
         case mul(Int, Int)
     }
 
-    func parse() -> [Instruction] {
+    static func parse(_ string: String) -> [Instruction] {
         let mulPattern = /mul\(([0-9]+),([0-9]+)\)/
         let doPattern = /do\(\)/
         let dontPattern = /don't\(\)/
@@ -34,7 +34,7 @@ struct Day3 {
             dontPattern
         }
         var result = [Instruction]()
-        for match in input.matches(of: pattern) {
+        for match in string.matches(of: pattern) {
             switch match.0 {
             case "do()":
                 result.append(.do)
@@ -48,8 +48,8 @@ struct Day3 {
     }
 
     // 189600467
-    func part1() {
-        let result = parse()
+    func part1() -> String {
+        let result = input
             .compactMap { instruction in
                 switch instruction {
                 case .mul(let lhs, let rhs):
@@ -61,12 +61,12 @@ struct Day3 {
             .map { $0 * $1 }
             .reduce(0, +)
 
-        print(result)
+        return String(result)
     }
 
     // 107069718
-    func part2() {
-        let instructions = parse()
+    func part2() -> String {
+        let instructions = input
         var `do` = true
         var result = 0
         for instruction in instructions {
@@ -84,7 +84,7 @@ struct Day3 {
             }
         }
 
-        print(result)
+        return String(result)
     }
 
 }

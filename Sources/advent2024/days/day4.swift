@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Day4 {
-    let input: String
+struct Day4: Day {
+    let input: Grid<Character>
 
     static let example: String = """
     MMMSXXMASM
@@ -23,15 +23,15 @@ struct Day4 {
     MXMXAXMASX
     """
 
-    func parse() -> Grid<Character> {
-        let characterGrid = input.split(separator: .newlineSequence)
+    static func parse(_ string: String) -> Grid<Character> {
+        let characterGrid = string.split(separator: .newlineSequence)
             .map { Array($0) }
         return Grid(grid: characterGrid)
     }
 
     // 2521
-    func part1() {
-        let grid = parse()
+    func part1() -> String {
+        let grid = input
         let searchSequence: [Character] = ["X", "M", "A", "S"]
         var matchCount = 0
         for location in grid.coordinates {
@@ -44,12 +44,12 @@ struct Day4 {
                 }
             }
         }
-        print(matchCount)
+        return String(matchCount)
     }
 
     // 1912
-    func part2() {
-        let grid = parse()
+    func part2() -> String {
+        let grid = input
         var matchCount = 0
         for location in grid.coordinates {
             for window in windows() {
@@ -59,7 +59,7 @@ struct Day4 {
             }
         }
 
-        print(matchCount)
+        return String(matchCount)
     }
 
     func windowMatches(window: [[Character?]], at location: Vec2D, in grid: Grid<Character>) -> Bool {

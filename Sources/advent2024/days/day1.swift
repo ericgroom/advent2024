@@ -8,8 +8,10 @@
 import Foundation
 
 
-struct Day1 {
-    let input: String
+struct Day1: Day {
+
+    let input: [(Int, Int)]
+
     static let example = """
                   3   4
                   4   3
@@ -19,8 +21,8 @@ struct Day1 {
                   3   3
                   """
 
-    func parse() -> [(Int, Int)] {
-        input
+    static func parse(_ string: String) -> [(Int, Int)] {
+        string
             .components(separatedBy: .newlines)
             .filter { !$0.isEmpty }
             .map { (line: String) in
@@ -35,21 +37,19 @@ struct Day1 {
     }
 
     // 2192892
-    func part1() {
-        let parsed = parse()
-        let lhs = parsed.map(\.0).sorted()
-        let rhs = parsed.map(\.1).sorted()
+    func part1() -> String {
+        let lhs = input.map(\.0).sorted()
+        let rhs = input.map(\.1).sorted()
         let distances = zip(lhs, rhs)
             .map { abs($0 - $1) }
         let result = distances.reduce(0, +)
-        print(result)
+        return String(result)
     }
 
     // 22962826
-    func part2() {
-        let parsed = parse()
-        let lhs = parsed.map(\.0)
-        let rhs = parsed.map(\.1)
+    func part2() -> String {
+        let lhs = input.map(\.0)
+        let rhs = input.map(\.1)
         var rhsFrequency = [Int: Int]()
         for num in rhs {
             rhsFrequency[num, default: 0] += 1
@@ -57,6 +57,6 @@ struct Day1 {
         let result = lhs
             .map { $0 * rhsFrequency[$0, default: 0] }
             .reduce(0, +)
-        print(result)
+        return String(result)
     }
 }

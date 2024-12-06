@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Day5 {
-    let input: String
+struct Day5: Day {
+    let input: Input
 
     static let example = #"""
     47|53
@@ -48,8 +48,8 @@ struct Day5 {
         let updates: [Update]
     }
 
-    func parse() -> Input {
-        let parts = input.split(separator: "\n\n")
+    static func parse(_ string: String) -> Input {
+        let parts = string.split(separator: "\n\n")
         assert(parts.count == 2)
         let rules = parts[0]
             .split(separator: "\n")
@@ -74,20 +74,18 @@ struct Day5 {
     }
 
     // 4957
-    func part1() {
-        let input = parse()
+    func part1() -> String {
         let updatesToPrint = input.updates.filter { validUpdate(update: $0, rules: input.rules) }
         let result = resultFromUpdates(updates: updatesToPrint)
-        print(result)
+        return String(result)
     }
 
     // 6938
-    func part2() {
-        let input = parse()
+    func part2() -> String {
         let invalidUpdates = input.updates.filter { !validUpdate(update: $0, rules: input.rules) }
         let rectifiedUpdates = invalidUpdates.map { rectifyUpdate(update: $0, rules: input.rules) }
         let result = resultFromUpdates(updates: rectifiedUpdates)
-        print(result)
+        return String(result)
     }
 
     private func rectifyUpdate(update: Update, rules: Rules) -> Update {

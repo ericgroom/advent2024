@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct Day2 {
-    let input: String
+struct Day2: Day {
+    let input: [[Int]]
 
     static let example = """
     7 6 4 2 1
@@ -19,8 +19,8 @@ struct Day2 {
     1 3 6 7 9
     """
 
-    func parse(_ input: String) -> [[Int]] {
-        input
+    static func parse(_ string: String) -> [[Int]] {
+        string
             .components(separatedBy: .newlines)
             .filter { !$0.isEmpty }
             .map { line in
@@ -31,17 +31,17 @@ struct Day2 {
     }
 
     // 332
-    func part1() {
-        let reports = parse(input)
+    func part1() -> String {
+        let reports = input
         let result = reports
             .filter { safe(levels: $0) }
             .count
-        print(result)
+        return String(result)
     }
 
     // 398
-    func part2() {
-        let reports = parse(input)
+    func part2() -> String {
+        let reports = input
         let safeReports = reports.filter { safe(levels: $0)}
         let unsafeReports = reports.filter { !safe(levels: $0)}
         let newSafeReports = unsafeReports.filter { report in
@@ -51,7 +51,7 @@ struct Day2 {
                 return safe(levels: without)
             }
         }
-        print(safeReports.count + newSafeReports.count)
+        return String(safeReports.count + newSafeReports.count)
     }
 
     private func safe(levels: [Int]) -> Bool {

@@ -7,25 +7,29 @@ import InputFetcher
 @main
 struct Advent2024 {
     static func main() async throws {
-        Day1(input: Day1.example).part1()
-        try await Day1(input: fetchInput(for: 1)).part1()
-        Day1(input: Day1.example).part2()
-        try await Day1(input: fetchInput(for: 1)).part2()
-        Day2(input: Day2.example).part1()
-        try await Day2(input: fetchInput(for: 2)).part1()
-        Day2(input: Day2.example).part2()
-        try await Day2(input: fetchInput(for: 2)).part2()
-        Day3(input: Day3.example).part1()
-        try await Day3(input: fetchInput(for: 3)).part1()
-        Day3(input: Day3.example2).part2()
-        try await Day3(input: fetchInput(for: 3)).part2()
-        Day4(input: Day4.example).part1()
-        try await Day4(input: fetchInput(for: 4)).part1()
-        Day4(input: Day4.example).part2()
-        try await Day4(input: fetchInput(for: 4)).part2()
-        Day5(input: Day5.example).part1()
-        try await Day5(input: fetchInput(for: 5)).part1()
-        Day5(input: Day5.example).part2()
-        try await Day5(input: fetchInput(for: 5)).part2()
+        debugPrint(Day3.examples1, Day3.examples2)
+        try await run(Day1.self, number: 1)
+        try await run(Day2.self, number: 2)
+        try await run(Day3.self, number: 3)
+        try await run(Day4.self, number: 4)
+        try await run(Day5.self, number: 5)
+    }
+
+    private static func run<DayType: Day>(_ dayType: DayType.Type, number dayNum: Int) async throws {
+        print("Day \(dayNum)")
+        print("Part 1:")
+        let parser = dayType.parse
+        let realInput = try await parser(fetchInput(for: dayNum))
+        for rawExample in dayType.examples1 {
+            let example = try parser(rawExample)
+            print(dayType.init(input: example).part1())
+        }
+        print(dayType.init(input: realInput).part1())
+        print("Part 2:")
+        for rawExample in dayType.examples2 {
+            let example = try parser(rawExample)
+            print(dayType.init(input: example).part2())
+        }
+        print(dayType.init(input: realInput).part2())
     }
 }
