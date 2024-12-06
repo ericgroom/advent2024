@@ -140,6 +140,23 @@ enum Direction: CaseIterable, Equatable, Hashable {
         case .downRight: return .init(x: 1, y: 1)
         }
     }
+
+    static var cardinal: [Direction] {
+        [.up, .left, .right, .down]
+    }
+
+    func rotatedClockwise() -> Direction {
+        switch self {
+        case .upLeft: .up
+        case .up: .upRight
+        case .upRight: .right
+        case .left: .upLeft
+        case .right: .downRight
+        case .downLeft: .left
+        case .down: .downLeft
+        case .downRight: .down
+        }
+    }
 }
 
 struct Grid<Value> {

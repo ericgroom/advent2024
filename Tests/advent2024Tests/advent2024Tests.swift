@@ -56,3 +56,12 @@ func day5() async throws {
     #expect(Day5(input: example).part2() == "123")
     #expect(Day5(input: realInput).part2() == "6938")
 }
+
+@Test
+func day6() async throws {
+    let parser = Day6.parse
+    let realInput = try await parser(fetchInput(for: 6))
+    let example = parser(Day6.example)
+    #expect(Day6(input: example).part1() == "41")
+    #expect(Day6(input: realInput).part1() == "5101")
+}
