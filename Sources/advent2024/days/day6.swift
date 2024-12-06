@@ -59,20 +59,17 @@ struct Day6: Day {
     }
 
     func part1() -> String {
-        var lab = input
-        var visited: Set<Vec2D> = []
-        repeat {
-            visited.insert(lab.guard.position)
-            advanceGuard(&lab)
-        } while lab.map[lab.guard.position] != nil
-        return String(visited.count)
+        let lab = input
+        let path = guardPath(lab: lab)
+        return String(Set(path).count)
     }
     
     func part2() -> String {
         let lab = input
         let guardStartingPosition = lab.guard.position
         var trappingPositions: Set<Vec2D> = []
-        for testCoord in lab.map.coordinates {
+        let guardPath = guardPath(lab: lab)
+        for testCoord in guardPath {
             guard testCoord != guardStartingPosition else { continue }
             var testLab = lab
             testLab.map[testCoord] = .obstructed
@@ -82,6 +79,16 @@ struct Day6: Day {
             }
         }
         return String(trappingPositions.count)
+    }
+
+    private func guardPath(lab: Lab) -> [Vec2D] {
+        var lab = input
+        var visited: [Vec2D] = []
+        repeat {
+            visited.append(lab.guard.position)
+            advanceGuard(&lab)
+        } while lab.map[lab.guard.position] != nil
+        return visited
     }
 
     enum GuardResult { case escaped, looped }
