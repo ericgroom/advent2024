@@ -34,8 +34,18 @@ struct Day7: Day {
     }
 
     func part1() -> String {
-        let result = input.filter { (testNum, operands) in
-            let operatorPermutations = slotPermutations(Operator.allCases, desiredCount: operands.count - 1)
+        let result = calibrationResult(possibleOperators: [.add, .multiply])
+        return "\(result)"
+    }
+
+    func part2() -> String {
+        let result = calibrationResult(possibleOperators: [.add, .multiply, .concat])
+        return "\(result)"
+    }
+
+    private func calibrationResult(possibleOperators: [Operator]) -> Int {
+        input.filter { (testNum, operands) in
+            let operatorPermutations = slotPermutations(possibleOperators, desiredCount: operands.count - 1)
             for permutation in operatorPermutations {
                 let result = evaluate(operands, operators: permutation)
                 if result == testNum {
@@ -44,16 +54,12 @@ struct Day7: Day {
             }
             return false
         }.keys.reduce(0, +)
-        return "\(result)"
-    }
-
-    func part2() -> String {
-        return ""
     }
 
     enum Operator: CaseIterable {
         case add
         case multiply
+        case concat
     }
 
     private func evaluate(_ operands: [Int], operators: [Operator]) -> Int {
@@ -65,6 +71,8 @@ struct Day7: Day {
                 result += operand
             case .multiply:
                 result *= operand
+            case .concat:
+                result = Int("\(result)\(operand)")!
             }
         }
         return result
