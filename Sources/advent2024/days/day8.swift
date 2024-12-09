@@ -47,9 +47,7 @@ struct Day8: Day {
                 }
             }
         }
-        let width = input.coordinates.map(\.x).max()!
-        let height = input.coordinates.map(\.x).max()!
-        let result = Set(antinodes.filter { $0.x <= width && $0.y <= height && $0.x >= 0 && $0.y >= 0 })
+        let result = Set(antinodes)
         return String(result.count)
     }
     
@@ -74,9 +72,7 @@ struct Day8: Day {
                 }
             }
         }
-        let width = input.coordinates.map(\.x).max()!
-        let height = input.coordinates.map(\.x).max()!
-        let result = Set(antinodes.filter { $0.x <= width && $0.y <= height && $0.x >= 0 && $0.y >= 0 })
+        let result = Set(antinodes)
         return String(result.count)
     }
     
