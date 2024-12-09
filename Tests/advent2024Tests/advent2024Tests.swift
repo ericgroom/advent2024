@@ -86,6 +86,6 @@ func day8() async throws {
     let example = parser(Day8.example)
     #expect(Day8(input: example).part1() == "14")
     #expect(Day8(input: realInput).part1() == "301")
-//    #expect(Day8(input: example).part2() == "11387")
-//    #expect(Day8(input: realInput).part2() == "189207836795655")
+    #expect(Day8(input: example).part2() == "34")
+    #expect(Day8(input: realInput).part2() == "1019")
 }

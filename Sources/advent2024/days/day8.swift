@@ -64,7 +64,20 @@ struct Day8: Day {
     }
     
     func part2() -> String {
-        return ""
+        let antennasByFrequency = groupedAntennas()
+        var antinodes = [Vec2D]()
+        for location in input.coordinates {
+            for (frequency, antennas) in antennasByFrequency {
+                for pair in allPermutations(antennas) {
+                    guard isOnLine(point: location, line: pair) else { continue }
+                    antinodes.append(location)
+                }
+            }
+        }
+        let width = input.coordinates.map(\.x).max()!
+        let height = input.coordinates.map(\.x).max()!
+        let result = Set(antinodes.filter { $0.x <= width && $0.y <= height && $0.x >= 0 && $0.y >= 0 })
+        return String(result.count)
     }
     
     private func groupedAntennas() -> [Character: Array<Vec2D>] {
