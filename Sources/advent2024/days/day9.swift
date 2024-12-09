@@ -16,7 +16,7 @@ struct Day9: Day {
         let kind: BlockKind
         var size: Int
     }
-    enum BlockKind {
+    enum BlockKind: Equatable {
         case file(id: Int)
         case empty
 
@@ -24,6 +24,13 @@ struct Day9: Day {
             switch self {
             case .empty: return false
             case .file: return true
+            }
+        }
+
+        func hasId(_ testId: Int) -> Bool {
+            switch self {
+            case .empty: return false
+            case .file(let id): return id == testId
             }
         }
     }
@@ -80,6 +87,32 @@ struct Day9: Day {
         return blocks[firstEmptyIndex...].contains(where: { $0.kind.isFile })
     }
 
+    private func moveFile(_ blocks: [Block], id: Int) -> [Block] {
+        var blocks = blocks
+        let rightmostFileIndex = blocks.lastIndex(where: { $0.kind.hasId(id) })!
+        let file = blocks[rightmostFileIndex]
+        guard let leftmostEmptyIndex = blocks[...rightmostFileIndex].firstIndex(where: { !$0.kind.isFile && $0.size >= file.size }) else { return blocks }
+        let empty = blocks[leftmostEmptyIndex]
+        blocks[leftmostEmptyIndex].size -= file.size
+        blocks[rightmostFileIndex] = Block(kind: .empty, size: file.size)
+        blocks.insert(file, at: leftmostEmptyIndex)
+        return combineBlocks(blocks)
+    }
+
+    private func combineBlocks(_ blocks: [Block]) -> [Block] {
+        blocks.reduce(into: [Block]()) { partialResult, nextBlock in
+            guard let lastBlock = partialResult.last else {
+                partialResult.append(nextBlock)
+                return
+            }
+            if lastBlock.kind == nextBlock.kind {
+                partialResult[partialResult.endIndex-1].size += nextBlock.size
+            } else {
+                partialResult.append(nextBlock)
+            }
+        }
+    }
+
     private func defragStep(_ blocks: [Block]) -> [Block] {
         var blocks = blocks
         let rightmostFileIndex = blocks.lastIndex(where: { $0.kind.isFile })!
@@ -105,7 +138,17 @@ struct Day9: Day {
     }
 
     func part2() -> String {
-        return ""
+        var blocks = input
+        let maxId: Int = input.compactMap {
+            switch $0.kind {
+            case .empty: nil
+            case .file(let id): id
+            }
+        }.max()!
+        for id in (0...maxId).reversed() {
+            blocks = moveFile(blocks, id: id)
+        }
+        return String(checksum(blocks))
     }
 
     private func debugString(_ blocks: [Block]) -> String {
