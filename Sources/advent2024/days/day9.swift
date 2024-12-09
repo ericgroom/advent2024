@@ -112,16 +112,16 @@ struct Day9: Day {
                 minFileIdSeen = min(id, minFileIdSeen)
                 toNextEmptyBlock(from: &lhs, in: blocks)
                 if lhs >= blocks.endIndex { break }
-                toStartOfBlock(at: &rhs, in: blocks)
-                let fileLength = lengthOfBlock(startingAt: rhs, in: blocks[...])
+                let fileLength = lengthOfBlockRev(startingAt: rhs, in: blocks[...])
                 if let emptyBlockIndex = firstEmptyBlockIndex(of: fileLength, in: blocks[lhs...]), emptyBlockIndex < rhs {
                     var offset = 0
                     while offset < fileLength {
                         defer { offset += 1 }
                         blocks[emptyBlockIndex + offset] = .file(id: id)
-                        blocks[rhs + offset] = .empty
+                        blocks[rhs - offset] = .empty
                     }
                 }
+                rhs -= fileLength-1
             }
         }
         return String(checksum(blocks))
@@ -133,8 +133,25 @@ struct Day9: Day {
     }
 
     private func lengthOfBlock(startingAt index: Int, in blocks: ArraySlice<Block>) -> Int {
+        var index = index
+        var count = 0
         let value = blocks[index]
-        return blocks[index...].prefix { $0 == value }.count
+        while index < blocks.endIndex && blocks[index] == value {
+            index += 1
+            count += 1
+        }
+        return count
+    }
+
+    private func lengthOfBlockRev(startingAt index: Int, in blocks: ArraySlice<Block>) -> Int {
+        var index = index
+        var count = 0
+        let value = blocks[index]
+        while index >= blocks.startIndex && blocks[index] == value {
+            index -= 1
+            count += 1
+        }
+        return count
     }
 
     private func debugString(_ blocks: some Sequence<Block>) -> String {
