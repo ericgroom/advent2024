@@ -92,7 +92,6 @@ struct Day9: Day {
         let rightmostFileIndex = blocks.lastIndex(where: { $0.kind.hasId(id) })!
         let file = blocks[rightmostFileIndex]
         guard let leftmostEmptyIndex = blocks[...rightmostFileIndex].firstIndex(where: { !$0.kind.isFile && $0.size >= file.size }) else { return blocks }
-        let empty = blocks[leftmostEmptyIndex]
         blocks[leftmostEmptyIndex].size -= file.size
         blocks[rightmostFileIndex] = Block(kind: .empty, size: file.size)
         blocks.insert(file, at: leftmostEmptyIndex)

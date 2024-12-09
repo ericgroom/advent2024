@@ -35,7 +35,7 @@ struct Day8: Day {
         let antennasByFrequency = groupedAntennas()
         var antinodes = [Vec2D]()
         for location in input.coordinates {
-            for (frequency, antennas) in antennasByFrequency {
+            for (_, antennas) in antennasByFrequency {
                 for pair in allPermutations(antennas) {
                     guard isOnLine(point: location, line: pair) else { continue }
                     let distA = Vec2D.euclideanDistance(pair.0, location)
@@ -65,7 +65,7 @@ struct Day8: Day {
         let antennasByFrequency = groupedAntennas()
         var antinodes = [Vec2D]()
         for location in input.coordinates {
-            for (frequency, antennas) in antennasByFrequency {
+            for (_, antennas) in antennasByFrequency {
                 for pair in allPermutations(antennas) {
                     guard isOnLine(point: location, line: pair) else { continue }
                     antinodes.append(location)
