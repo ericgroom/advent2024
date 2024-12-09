@@ -12,11 +12,7 @@ struct Day9: Day {
     
     typealias Input = [Block]
 
-    struct Block {
-        let kind: BlockKind
-        var size: Int
-    }
-    enum BlockKind: Equatable {
+    enum Block: Equatable {
         case file(id: Int)
         case empty
 
@@ -42,11 +38,16 @@ struct Day9: Day {
         for char in Array(string) {
             if char == "\n" { continue }
             let length = Int(String(char))!
-            if isFile {
-                result.append(Block(kind: .file(id: nextId), size: length))
-                nextId += 1
+            let block = if isFile {
+                Block.file(id: nextId)
             } else {
-                result.append(Block(kind: .empty, size: length))
+                Block.empty
+            }
+            for _ in 0..<length {
+                result.append(block)
+            }
+            if isFile {
+                nextId += 1
             }
             isFile.toggle()
         }
@@ -55,116 +56,94 @@ struct Day9: Day {
 
     func part1() -> String {
         var blocks = input
-        while hasGaps(blocks) {
-            blocks = defragStep(blocks)
+        var lhs = blocks.startIndex
+        var rhs = blocks.endIndex-1
+        while rhs >= blocks.startIndex && lhs < blocks.endIndex && rhs >= lhs {
+            defer { rhs -= 1 }
+            switch blocks[rhs] {
+            case .empty: continue
+            case .file(id: let id):
+                toNextEmptyBlock(from: &lhs, in: blocks)
+                if lhs >= blocks.endIndex || rhs < lhs { break }
+                blocks[lhs] = .file(id: id)
+                blocks[rhs] = .empty
+            }
         }
         return String(checksum(blocks))
     }
 
+    private func toNextEmptyBlock(from start: inout Int, in blocks: borrowing [Block]) {
+        while start < blocks.endIndex && blocks[start].isFile  { start += 1 }
+    }
+
+    private func firstEmptyBlockIndex(of size: Int, in blocks: ArraySlice<Block>) -> Int? {
+        var index = blocks.startIndex
+        while index < blocks.endIndex {
+            let length = lengthOfBlock(startingAt: index, in: blocks)
+            let block = blocks[index]
+            if !block.isFile && length >= size { return index }
+            index = index + length
+        }
+        return nil
+    }
+
     private func checksum(_ blocks: [Block]) -> Int {
-        var position = 0
-        var blockIndex = 0
-        var checksum = 0
-        while blockIndex < blocks.endIndex {
-            defer { blockIndex += 1 }
-            let block = blocks[blockIndex]
-            var remaining = block.size
-            while remaining > 0 {
-                let multiplier = switch block.kind {
+        blocks.enumerated()
+            .map {
+                switch $0.element {
                 case .empty: 0
-                case .file(let id): id
+                case .file(let id): id * $0.offset
                 }
-                checksum += multiplier * position
-                remaining -= 1
-                position += 1
             }
-        }
-        return checksum
-    }
-
-    private func hasGaps(_ blocks: [Block]) -> Bool {
-        let firstEmptyIndex = blocks.firstIndex { !$0.kind.isFile }!
-        return blocks[firstEmptyIndex...].contains(where: { $0.kind.isFile })
-    }
-
-    private func moveFile(_ blocks: [Block], id: Int) -> [Block] {
-        var blocks = blocks
-        let rightmostFileIndex = blocks.lastIndex(where: { $0.kind.hasId(id) })!
-        let file = blocks[rightmostFileIndex]
-        guard let leftmostEmptyIndex = blocks[...rightmostFileIndex].firstIndex(where: { !$0.kind.isFile && $0.size >= file.size }) else { return blocks }
-        blocks[leftmostEmptyIndex].size -= file.size
-        blocks[rightmostFileIndex] = Block(kind: .empty, size: file.size)
-        blocks.insert(file, at: leftmostEmptyIndex)
-        return combineBlocks(blocks)
-    }
-
-    private func combineBlocks(_ blocks: [Block]) -> [Block] {
-        blocks.reduce(into: [Block]()) { partialResult, nextBlock in
-            guard let lastBlock = partialResult.last else {
-                partialResult.append(nextBlock)
-                return
-            }
-            if lastBlock.kind == nextBlock.kind {
-                partialResult[partialResult.endIndex-1].size += nextBlock.size
-            } else {
-                partialResult.append(nextBlock)
-            }
-        }
-    }
-
-    private func defragStep(_ blocks: [Block]) -> [Block] {
-        var blocks = blocks
-        let rightmostFileIndex = blocks.lastIndex(where: { $0.kind.isFile })!
-        let leftmostEmptyIndex = blocks.firstIndex(where: { !$0.kind.isFile })!
-        let file = blocks[rightmostFileIndex]
-        let empty = blocks[leftmostEmptyIndex]
-        let newSize = min(file.size, empty.size)
-        let newFileBlock = Block(kind: file.kind, size: newSize)
-        let newEmptyBlock = Block(kind: .empty, size: newSize)
-        if newSize == file.size {
-            blocks.remove(at: rightmostFileIndex)
-        } else {
-            blocks[rightmostFileIndex].size -= newSize
-        }
-        if newSize == empty.size {
-            blocks[leftmostEmptyIndex] = newFileBlock
-        } else {
-            blocks[leftmostEmptyIndex].size -= newSize
-            blocks.insert(newFileBlock, at: leftmostEmptyIndex)
-        }
-        blocks.append(newEmptyBlock)
-        return blocks
+            .reduce(0, +)
     }
 
     func part2() -> String {
         var blocks = input
-        let maxId: Int = input.compactMap {
-            switch $0.kind {
-            case .empty: nil
-            case .file(let id): id
+        var lhs = blocks.startIndex
+        var rhs = blocks.endIndex-1
+        var minFileIdSeen = Int.max
+        while rhs >= blocks.startIndex {
+            defer { rhs -= 1 }
+            switch blocks[rhs] {
+            case .empty: continue
+            case .file(id: let id):
+                if id > minFileIdSeen { continue }
+                minFileIdSeen = min(id, minFileIdSeen)
+                toNextEmptyBlock(from: &lhs, in: blocks)
+                if lhs >= blocks.endIndex { break }
+                toStartOfBlock(at: &rhs, in: blocks)
+                let fileLength = lengthOfBlock(startingAt: rhs, in: blocks[...])
+                if let emptyBlockIndex = firstEmptyBlockIndex(of: fileLength, in: blocks[lhs...]), emptyBlockIndex < rhs {
+                    var offset = 0
+                    while offset < fileLength {
+                        defer { offset += 1 }
+                        blocks[emptyBlockIndex + offset] = .file(id: id)
+                        blocks[rhs + offset] = .empty
+                    }
+                }
             }
-        }.max()!
-        for id in (0...maxId).reversed() {
-            blocks = moveFile(blocks, id: id)
         }
         return String(checksum(blocks))
     }
 
-    private func debugString(_ blocks: [Block]) -> String {
-        var result: String = ""
-        for block in blocks {
-            var remaining = block.size
-            while remaining > 0 {
-                defer { remaining -= 1 }
-                switch block.kind {
-                case .file(let id):
-                    result += "\(id)"
-                case .empty:
-                    result += "."
-                }
+    private func toStartOfBlock(at index: inout Int, in blocks: [Block]) {
+        let value = blocks[index]
+        while index > blocks.startIndex && blocks[index-1] == value { index -= 1 }
+    }
+
+    private func lengthOfBlock(startingAt index: Int, in blocks: ArraySlice<Block>) -> Int {
+        let value = blocks[index]
+        return blocks[index...].prefix { $0 == value }.count
+    }
+
+    private func debugString(_ blocks: some Sequence<Block>) -> String {
+        blocks.map { block in
+            switch block {
+            case .empty: "."
+            case .file(let id): "\(id)"
             }
-        }
-        return result
+        }.reduce("", +)
     }
 
     static let example: String = "2333133121414131402"
