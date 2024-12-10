@@ -191,9 +191,10 @@ struct Grid<Value> {
         }
     }
 
-    func neighbors(of v: Vec2D) -> [(Vec2D, Value)] {
+    func neighbors(of v: Vec2D, directions: [Direction] = Direction.allCases) -> [(Vec2D, Value)] {
         var result: [(Vec2D, Value)] = []
-        for neighbor in v.neighbors {
+        for direction in directions {
+            let neighbor = direction.unitVector + v
             if let value = self[neighbor] {
                 result.append((neighbor, value))
             }
@@ -203,5 +204,11 @@ struct Grid<Value> {
 
     var coordinates: some Sequence<Vec2D> {
         data.keys
+    }
+}
+
+extension Grid {
+    func map<T>(_ transform: (Value) throws -> T) rethrows -> Grid<T> {
+        Grid<T>(data: try data.mapValues(transform))
     }
 }
