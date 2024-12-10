@@ -43,7 +43,12 @@ struct Day10: Day {
     }
 
     func part2() -> String {
-        return ""
+        var score = 0
+        for coord in input.coordinates {
+            guard input[coord] == 0 else { continue }
+            score += self.rating(trailhead: coord, map: input)
+        }
+        return String(score)
     }
 
     private func score(trailhead: Vec2D, map: Grid<Int>) -> Int {
@@ -62,5 +67,26 @@ struct Day10: Day {
         return visited.count { coord in
             map[coord] == 9
         }
+    }
+
+    private func rating(trailhead: Vec2D, map: Grid<Int>) -> Int {
+        func inner(path: [Vec2D]) -> Int {
+            guard !path.isEmpty else { return 0 }
+            let latest = path.last!
+            if map[latest]! == 9 {
+                return 1
+            }
+
+            let neighbors = map
+                .neighbors(of: latest, directions: Direction.cardinal)
+                .filter { $0.1 - map[latest]! == 1 }
+                .map(\.0)
+
+            return neighbors.reduce(0) { partialResult, neighbor in
+                partialResult + rating(trailhead: neighbor, map: map)
+            }
+        }
+
+        return inner(path: [trailhead])
     }
 }
