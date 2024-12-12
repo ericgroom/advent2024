@@ -21,7 +21,7 @@ protocol Day {
 
     func part1() -> String
     func part2() -> String
-    static func parse(_ string: String) throws -> Input
+    static func parse(_ string: String) -> Input
 }
 
 extension Day {
